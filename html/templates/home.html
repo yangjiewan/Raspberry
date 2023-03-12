@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>home</title>
+
+    <style>
+    </style>
+    <script type="text/javascript">
+        //用于填写发送消息的输入框
+        var messageBox;
+        //用于显示消息的div容器
+        var messageLog;
+        //WebSocket对象
+        var socket;
+
+        //页面加载完毕
+        window.onload = function () {
+            messageBox = document.getElementById('messageBox');
+            messageLog = document.getElementById('messageLog');
+
+            messageLog.innerHTML += "<br>--- try Socket连接 ---";
+            connect();
+            messageLog.innerHTML += "<br>--- try Socket connect ---";
+        }
+
+        function get_post_info(method, url, info) {
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest
+            var xmlhttp;
+            if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+                messageLog.innerHTML += "XMLHttpRequest";
+                xmlhttp=new XMLHttpRequest();
+            }else{// code for IE6, IE5
+                messageLog.innerHTML += "Microsoft.XMLHTTP";
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xmlhttp.open(method, url, false);
+            xmlhttp.onload = function () {
+                // 请求结束后，在此处写处理代码
+            };
+            xmlhttp.send(info);
+            messageLog.innerHTML += xmlhttp.responseText;
+        }
+
+        //创建socket对象并绑定所有事件
+        function connect() {
+            get_post_info("POST", "/reset", '{"password": "1234","username": "987654321"}');
+
+            // var xmlhttp;
+            // if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+            //     xmlhttp=new XMLHttpRequest();
+            // }else{// code for IE6, IE5
+            //     xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            // }
+            // xmlhttp.open("POST","/reset",false);
+            // xmlhttp.send();
+            // messageLog.innerHTML += xmlhttp.responseText;
+            //创建socket对象
+            // socket = new WebSocket("127.0.0.1:80");
+            //
+            // //监听所有的Web socket事件
+            // socket.onopen = connectionOpen;
+            // socket.onmessage = messageReceived;
+            // socket.onerror = errorOccurred;
+            // socket.onclose = connectionClosed;
+        }
+
+        //断开连接按钮点击
+        function disconnect() {
+            socket.close();
+        }
+
+        //发送消息按钮点击
+        function sendMessage() {
+            //获取要发送的数据
+            var message = messageBox.value;
+            get_post_info("POST", "/reset", "foo=bar&lorem=ipsum" + message);
+            //通过socket发送消息
+            // socket.send(message);
+
+            //告诉用户刚刚发生了什么
+            messageLog.innerHTML += "<br>发送：" + message;
+        }
+
+        //连接建立完毕事件响应
+        function connectionOpen(e) {
+            messageLog.innerHTML += "<br>--- Socket连接成功 ---";
+        }
+
+        //消息接收事件响应
+        function messageReceived(e) {
+            messageLog.innerHTML += "<br>收到：" + e.data;
+        }
+
+        //错误事件响应
+        function errorOccurred(e) {
+            messageLog.innerHTML += "<br>发生错误：" + e.data;
+        }
+
+        //连接关闭事件响应
+        function connectionClosed(e) {
+            messageLog.innerHTML += "<br>--- Socket连接关闭 ---";
+        }
+    </script>
+</head>
+<body>
+<input id="messageBox" type="text" value="Karam234"/>
+<button onclick="sendMessage()">发送</button>
+<button onclick="disconnect()">断开</button>
+<div id="messageLog"></div>
+</body>
+</html>

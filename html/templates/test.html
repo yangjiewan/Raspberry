@@ -1,0 +1,181 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>一统江河打标签打印系统</title>
+    <script type="text/javascript">
+        //页面加载完毕
+        window.onload = function () {
+            document.getElementById('messageLog').innerHTML += "<br> onload ok....";
+            // //用于填写发送消息的输入框
+            // var messageBox = document.getElementById('messageBox');
+            // //用于显示消息的div容器
+            // var messageLog = document.getElementById('messageLog');
+            // messageLog.innerHTML += "<br>--- window.onload ---";
+            // messageLog.innerHTML += "<br>--- try Socket连接 ---";
+        }
+        //
+        // window.onpageshow = function(event) {
+        //     messageBox = document.getElementById('messageBox');
+        //     messageLog.innerHTML += "<br>--- window.onpageshow ---";
+        //   if (event.persisted) {
+        //     window.location.reload();
+        // }};
+
+        function get_post_info(method, url, info) {
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest
+            var xmlhttp;
+            if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+                messageLog.innerHTML += "XMLHttpRequest";
+                xmlhttp=new XMLHttpRequest();
+            }else{// code for IE6, IE5
+                messageLog.innerHTML += "Microsoft.XMLHTTP";
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xmlhttp.open(method, url, false);
+            xmlhttp.onload = function () {
+                // 请求结束后，在此处写处理代码
+            };
+            xmlhttp.send(info);
+
+            document.getElementById('messageLog').innerHTML += xmlhttp.responseText;
+            // var messageLog = document.getElementById('messageLog');
+            // messageLog.innerHTML += xmlhttp.responseText;
+        }
+
+        //发送消息按钮点击
+        function sendMessage() {
+            // var messageLog = document.getElementById('messageLog');
+            // var messageBox = document.getElementById('messageBox');
+            // // var passwordBox = document.getElementById('passwordBox');
+            // //
+            // // passwordBox = messageBox;
+            //
+            // //获取要发送的数据
+            // messageLog.innerHTML += "<br>--- try sendMessage ---";
+            var message = document.getElementById('messageBox').value;
+            get_post_info("POST", "/reset", "foo=bar&lorem=ipsum" + message);
+            //通过socket发送消息
+            // socket.send(message);
+
+            //告诉用户刚刚发生了什么
+            document.getElementById('messageLog').innerHTML += "<br> 发送：" + message;
+            // messageLog.innerHTML += "<br>发送：" + message;
+        }
+        //断开连接按钮点击
+        function disconnect() {
+            document.getElementById('messageLog').innerHTML += "<br> disconnect------";
+            // var messageBox = document.getElementById('messageBox');
+            // var messageLog = document.getElementById('messageLog');
+            // messageLog.innerHTML = "<br>--- try sendMessage ---";
+            // var messageLog = document.getElementById('messageLog');
+            // messageLog.innerHTML += "<br>断开连接";
+            // window.location.reload();
+        }
+
+
+        function stop_print(){
+            document.getElementById('messageLog').innerText = "<br> 断开连接123";
+            // var print_num = $('#print_num').val();//从第一个输入框里获取数据
+            // var print_sel = $('#selection').val();//从第一个输入框里获取数据
+            // setInterval(get_info, 1000);
+            // $.ajax({
+            //     url:"/start",//调用的是这个url对应的那个Handler
+            //     type:"POST",//Post方法
+            //     data:{printer_number:print_num, printer_selection:print_sel},//要往服务器传递的数据
+            //     success:function(arg){//成功从服务端获取到值，参数arg表示从服务端的Handler获取的数据
+            //         var obj = jQuery.parseJSON(arg);//获取的数据一般为json格式，用这个方法来解析数据
+            //     },
+            //     error:function(){//获取失败
+            //         console.log("failed");
+            //     }
+            // });
+        }
+
+
+    </script>
+</head>
+<body>
+<div class="table-box" style="font-size:42px">
+    <table border="1" cellpadding="3" cellspacing="1" align="center" style="width:960px;">
+        <form method="post">
+            <tbody align="center">
+                <tr>
+                    <th colspan="2">一统江河打标签打印系统</th>
+                </tr>
+                <tr>
+                    <td>味型模板：</td>
+    <!--                <td>-->
+    <!--                    <select id="selection" name="printer_selection" onchange="show()" style="width:500px; font-size:42px">-->
+    <!--                        <option style="display:none" value="{{static_url('使用说明书.png')}}"> -请选择- </option>-->
+    <!--                        {% for book in books %}-->
+    <!--                            <option  value="{{static_url(book+'.png')}}">{{ book }}</option>-->
+    <!--                        {% end %}-->
+    <!--                    </select>-->
+    <!--                </td>-->
+                </tr>
+                <tr>
+                    <td>打印数量：</td>
+                    <td>
+                        <input type="number" id="print_num" name="printer_number" min="1" value="1" style="width:500px; font-size:42px"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" value="取消打印" style="font-size:42px" onclick="stop_print();"/>
+                    </td>
+    <!--                <td>-->
+    <!--                    <input type="button" value="开始打印" style="font-size:42px" onclick="start_print();"/>-->
+    <!--                </td>-->
+                </tr>
+                <tr align="left">
+                    <td colspan="2">
+                        <b>提示信息：</b>
+                        <p><span style="color:blue" id="printer_info"></span></p>
+                    </td>
+                </tr>
+    <!--            <tr>-->
+    <!--                <td colspan="2">-->
+    <!--                    <img id="heading" src="{{static_url('使用说明书.png')}}" style="width:960px;"><br>-->
+    <!--                </td>-->
+    <!--            </tr>-->
+            </tbody>
+        </form>
+
+    </table>
+</div>
+
+
+<!--    <form>-->
+        <div class="item">
+            <input id="messageBox" type="text" value="Kara"/>
+            <label for="">用户名</label>
+        </div>
+        <div class="item">
+            <input type="text" value="password"/>
+<!--            <input type="password"/>-->
+<!--            <label id="passwordBox" for="">密码</label>-->
+        </div>
+        <p><span style="color:blue" id="messageLog"></span></p>
+<!--        <div id="messageLog" type="text" value="Kara"/></div>-->
+<!--        <button onclick="sendMessage();">-->
+
+<!--            <span>SUBMIT345</span>-->
+<!--        </button>-->
+        <input type="button" value="断开" style="font-size:42px" onclick="disconnect();"/>
+
+<!--        <button onclick=sendMessage()>-->
+<!--            <span>连接111</span>-->
+<!--        </button>-->
+        <input type="button" value="取消打印" style="font-size:42px" onclick="sendMessage();"/>
+<!--        <button onclick=disconnect()>-->
+<!--            <span>断开</span>-->
+<!--        </button>-->
+<!--    </form>-->
+<!--<input id="messageBox" type="text" value="Kara"/>-->
+<!--<button onclick="sendMessage()">发送</button>-->
+<!--<button onclick="disconnect()">断开</button>-->
+<!--<div id="messageLog"></div>-->
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PICO</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            document.getElementById('messageLog').innerHTML += "\n--window.onload 加载";
+        };
+        window.onpageshow = function (event) {
+            document.getElementById('messageLog').innerText += "\n--用户导航到网页加载";
+            setInterval(page_reload, 1000);
+            document.getElementById('messageLog').innerText += "\n--用户导航到网页加载完成";
+        };
+
+        function get_post_info(method, url, info) {
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest
+            var xmlhttp;
+            if (window.XMLHttpRequest) {  // code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp = new XMLHttpRequest();
+            } else {  // code for IE6, IE5
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.open(method, url, false);
+            xmlhttp.send(info);
+            // 将请求体转成json对象
+            return window.JSON.parse(xmlhttp.responseText);
+        }
+
+        function on_off_button_show(element, state) {
+            // 0表示关， 1表示开， -1表示切换
+            var circle = element.children[0];
+            var text = element.children[1];
+            if (arguments.length == 1) state = -1; // 设置默认状态
+            if (state == -1 && text.innerText == "开") state = 0; // 设置切换
+            if (state == 0) {
+                element.style = "width: 60px;height: 25px;margin: 0 3px;border-radius: 25px;font-size: 14px;cursor: pointer;position: relative;border: 1px solid white;background-color: #ccc;"
+                circle.style = "position: absolute;width: 15px;height: 15px;top: 5px;left: 5px;border-radius: 50%;box-shadow: 0 0 10px white;transition: all .5s;left: 40px;background-color: #888;box-shadow: 0 0 10px #888;";
+                text.style = "position: absolute;right: 10px;line-height: 25px;transition: all .5s;right: 30px;color: #888;";
+                text.innerText = "关";
+            } else {
+                element.style = "width: 60px;height: 25px;margin: 0 3px;border-radius: 25px;font-size: 14px;cursor: pointer;position: relative;border: 1px solid white;background-color: #12B090;";
+                circle.style = "position: absolute;width: 15px;height: 15px;top: 5px;left: 5px;background-color: rgb(255, 255, 255);border-radius: 50%;box-shadow: 0 0 10px white;transition: all .5s;";
+                text.style = "position: absolute;right: 10px;line-height: 25px;color: white;transition: all .5s;";
+                text.innerText = "开";
+            }
+        }
+
+        function change_gpio(element, gpio_num) {
+            var status;
+            var text = element.children[1]; // 开 或 关
+            if (text.innerText === "开") {
+                status = 0;
+            } else {
+                status = 1;
+            }
+            var gpio_json = get_post_info("post", "/set_gpio", "gpio_num=" + gpio_num + "&status=" + status);
+            if (gpio_json.status_code == "1" && gpio_json.gpio_number == gpio_num) {
+                on_off_button_show(element, gpio_json.data)
+            }
+            document.getElementById('messageLog').innerText += "\n--json：" + window.JSON.stringify(gpio_json);
+            document.getElementById('messageLog').innerText += "\n--gpio_json.state_code：" + gpio_json.status_code;
+            document.getElementById('messageLog').innerText += "\n--gpio_json.gpio_number：" + gpio_json.gpio_number;
+            if (gpio_json.status_code == "1") document.getElementById('messageLog').innerText += "\n--gpio_json.status_code：True";
+            if (gpio_json.gpio_number == gpio_num) document.getElementById('messageLog').innerText += "\n--gpio_json.number：True";
+        }
+
+        function page_reload() {
+            // document.getElementById('messageLog').innerText += "<br> page_reload开始加载。。。";
+            var btn_list = document.querySelectorAll(".btn-on");
+            var gpio_json = get_post_info("GET", "/gpio", "{}");
+            for (var info in gpio_json) {
+                if (btn_list[info]) on_off_button_show(btn_list[info], gpio_json[info]);
+            }
+        }
+    </script>
+    <noscript>当前浏览器不支持渲染脚本，请更换浏览器或平板后尝试！！</noscript>
+</head>
+<body onload="page_reload()" style="align-items: center;justify-content: center;">
+<table type="width:960px;">
+    <caption>交互GPIO界面</caption>
+    <thead>
+    <tr>
+        <th>开关</th>
+        <th>pin</th>
+        <th>开关</th>
+        <th>pin</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            <div class="btn-on" onclick="change_gpio(this, 0)">
+                <label class="btn-on-circle"></label>
+                <label class="btn-on-text">关</label>
+            </div>
+        </td>
+        <td>
+            <span>GPIO 0</span>
+        </td>
+        <td>
+            <div class="btn-on" onclick="change_gpio(this, 1)">
+                <label class="btn-on-circle"></label>
+                <label class="btn-on-text">关</label>
+            </div>
+        </td>
+        <td>
+            <span>GPIO 20</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="btn-on" onclick="change_gpio(this, 2)">
+                <label class="btn-on-circle"></label>
+                <label class="btn-on-text">关</label>
+            </div>
+        </td>
+        <td>
+            <span>GPIO 1</span>
+        </td>
+        <td>
+            <div class="btn-on" onclick="change_gpio(this, 3)">
+                <label class="btn-on-circle"></label>
+                <label class="btn-on-text">开</label>
+            </div>
+        </td>
+        <td>
+            <span>GPIO 21</span>
+        </td>
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="4">表格结束</td>
+    </tr>
+    </tfoot>
+</table>
+<p>
+    <span style="color:blue;" id="messageLog">--log--</span>
+</p>
+</body>
+</html>

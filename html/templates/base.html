@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>一统江河标签打印系统</title>
+</head>
+
+<body>
+
+<div class="table-box" style="font-size:42px">
+    <table border="1" cellpadding="3" cellspacing="1" align="center" style="width:960px;">
+        <form method="post">
+            <tbody align="center">
+            <tr>
+                <th colspan="2">一统江河标签打印系统13</th>
+            </tr>
+            <tr>
+                <td>味型模板：</td>
+                <td>
+                    <select id="selection" name="printer_selection" onchange="show()" style="width:500px; font-size:42px">
+                        <option style="display:none" value="{{static_url('使用说明书.png')}}"> -请选择- </option>
+                        {% for book in books %}
+                            <option  value="{{static_url(book+'.png')}}">{{ book }}</option>
+                        {% end %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>打印数量：</td>
+                <td>
+                    <input type="number" id="print_num" name="printer_number" min="1" value="1" style="width:500px; text-align:center; font-size:42px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" value="取消打印" style="font-size:42px" onclick="stop_print();"/>
+                </td>
+                <td>
+                    <input type="button" value="开始打印" style="font-size:42px" onclick="start_print();"/>
+                </td>
+            </tr>
+            <tr align="left">
+                <td colspan="2">
+                    <b>提示信息：</b>
+                    <p><span style="color:blue" id="printer_info"></span></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <img id="heading" src="{{static_url('使用说明书.png')}}" style="width:960px;"><br>
+                </td>
+            </tr>
+            </tbody>
+        </form>
+
+    </table>
+</div>
+    <script src="{{static_url('jquery-3.2.1.min.js')}}"></script> {#jquery文件位置#}
+    <script type="text/javascript">
+        $(
+            function () { // 定期刷新界面时间和提示信息
+                get_info();
+                setInterval(get_info, 1000);
+            }
+        );
+
+        function get_info() {
+            $.ajax({
+                url:"/info",//调用的是这个url对应的那个Handler
+                type:"POST",//Post方法
+                success: function (result) {
+                    var result = jQuery.parseJSON(result);//获取的数据一般为json格式，用这个方法来解析数据
+                    document.getElementById('printer_info').innerText = result.info;
+                }
+            });
+        }
+
+        function show() {
+            document.getElementById("heading").src = document.getElementById("selection").value;
+        }
+
+        function start_print(){
+            var print_num = $('#print_num').val();//从第一个输入框里获取数据
+            var print_sel = $('#selection').val();//从第一个输入框里获取数据
+            setInterval(get_info, 1000);
+            $.ajax({
+                url:"/start",//调用的是这个url对应的那个Handler
+                type:"POST",//Post方法
+                data:{printer_number:print_num, printer_selection:print_sel},//要往服务器传递的数据
+                success:function(arg){//成功从服务端获取到值，参数arg表示从服务端的Handler获取的数据
+                    var obj = jQuery.parseJSON(arg);//获取的数据一般为json格式，用这个方法来解析数据
+                },
+                error:function(){//获取失败
+                    console.log("failed");
+                }
+            });
+        }
+
+        function stop_print(){
+            $.ajax({
+                url:"/stop",//调用的是这个url对应的那个Handler
+                type:"POST",//Post方法
+                success:function(arg){//成功从服务端获取到值，参数arg表示从服务端的Handler获取的数据
+                    var obj = jQuery.parseJSON(arg);//获取的数据一般为json格式，用这个方法来解析数据
+                },
+                error:function(){//获取失败
+                    console.log("failed");
+                }
+            });
+        }
+
+    </script>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+</body>
+</html>

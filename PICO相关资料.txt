@@ -1,0 +1,15 @@
+Raspberry-Pi-PICO系列--第一篇 初识RP2040：
+https://blog.csdn.net/tianizimark/article/details/122708534
+
+pico-examples：C用例
+https://github.com/raspberrypi/pico-examples
+
+Raspberry Pi Pico实践系列3-基于PyCharm和MicroPython的树莓派Pico扩展接口使用与控制编程实践：
+https://yuanyx.blog.csdn.net/article/details/113483661
+
+学习资料
+http://micropython.86x.net/en/latet/rp2/quickref.html#installing-micropython
+
+树莓派实验室：
+https://shumeipai.nxez.com/hot-explorer
+

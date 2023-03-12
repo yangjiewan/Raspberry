@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Send Test</title>
+    <script type="text/javascript">
+        //用于填写发送消息的输入框
+        var messageBox = document.getElementById('messageBox');
+        //用于显示消息的div容器
+        var messageLog = document.getElementById('messageLog');
+        //页面加载完毕
+        window.onload = function () {
+            messageLog.innerHTML += "<br>window.onload";
+            messageLog.innerHTML += "<br>首次加载";
+            // messageBox = document.getElementById('messageBox');
+            // // messageLog = document.getElementById('messageLog');
+            //
+            // messageLog.innerHTML += "<br>--- window.onload ---";
+            // messageLog.innerHTML += "<br>--- try Socket连接 ---";
+        }
+
+        window.onpageshow = function(event) {
+            messageLog.innerHTML += "<br>window.onload";
+            messageLog.innerHTML += "<br>首次加载";
+            messageBox = document.getElementById('messageBox');
+            messageLog.innerHTML += "<br>--- window.onpageshow ---";
+          if (event.persisted) {
+            window.location.reload()
+        }};
+
+        function get_post_info(method, url, info) {
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest
+            var xmlhttp;
+            if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+                messageLog.innerHTML += "XMLHttpRequest";
+                xmlhttp=new XMLHttpRequest();
+            }else{// code for IE6, IE5
+                messageLog.innerHTML += "Microsoft.XMLHTTP";
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xmlhttp.open(method, url, false);
+            xmlhttp.onload = function () {
+                // 请求结束后，在此处写处理代码
+            };
+            xmlhttp.send(info);
+
+            messageBox = document.getElementById('messageBox');
+            messageLog.innerHTML += xmlhttp.responseText;
+        }
+        //发送消息按钮点击
+        function sendMessage() {
+            messageBox = document.getElementById('messageBox');
+            //获取要发送的数据
+            messageLog.innerHTML += "<br>--- try sendMessage ---";
+            var message = messageBox.value;
+            get_post_info("POST", "/reset", "foo=bar&lorem=ipsum" + message);
+            //通过socket发送消息
+            // socket.send(message);
+
+            //告诉用户刚刚发生了什么
+            messageLog.innerHTML += "<br>发送：" + message;
+        }
+        //断开连接按钮点击
+        function disconnect() {
+            messageLog.innerHTML += "<br>断开连接";
+        }
+    </script>
+</head>
+<body>
+<input id="messageBox" type="text" value="Karam234"/>
+<div id="messageLog"></div>
+<button onclick="sendMessage()">发送</button>
+<button onclick="disconnect()">断开</button>
+</body>
+</html>

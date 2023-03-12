@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0;text/html" charset="UTF-8">
+    <title>树莓派PICO前后端交互</title>
+    <style>
+        .btn-on {
+            width: 60px;
+            height: 25px;
+            margin: 0 3px;
+            border-radius: 25px;
+            font-size: 14px;
+        }
+
+        .btn-on {
+            cursor: pointer;
+            position: relative;
+            border: 1px solid white;
+            background-color: #12B090;
+        }
+
+        .btn-on-circle {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            top: 5px;
+            left: 5px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 50%;
+            box-shadow: 0 0 10px white;
+            transition: all .5s;
+        }
+
+        .btn-on-text {
+            position: absolute;
+            right: 10px;
+            line-height: 25px;
+            color: white;
+            transition: all .5s;
+        }
+    </style>
+    <script type="text/javascript">
+        //用于填写发送消息的输入框
+        var messageBox = document.getElementById('messageBox');
+        //用于显示消息的div容器
+        var messageLog = document.getElementById('messageLog');
+
+        window.onload = function () {
+            messageLog.innerHTML += "<br>--window.onload";
+            messageLog.innerHTML += "<br>--首次加载";
+        };
+
+        window.onpageshow = function (event) {
+            document.getElementById('messageLog').innerText += "<br>--用户导航到网页---";
+
+            init_btn();
+            setInterval(init_btn, 1000);
+        };
+
+        function send_post(method, url, info) {
+            document.getElementById('messageLog').innerText = "<br>--send_post---";
+        };
+
+        function disconnect() {
+            document.getElementById('messageLog').innerText = "<br>--disconnect---";
+        };
+
+        function get_post_info(method, url, info) {
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest
+            var xmlhttp;
+            if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+                messageLog.innerHTML += "XMLHttpRequest";
+                xmlhttp=new XMLHttpRequest();
+            }else{// code for IE6, IE5
+                messageLog.innerHTML += "Microsoft.XMLHTTP";
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xmlhttp.open(method, url, false);
+
+
+
+            xmlhttp.onload = function () {
+                // 请求结束后，在此处写处理代码
+            };
+            xmlhttp.send(info);
+            // messageLog.innerHTML += xmlhttp.responseText;
+            messageLog.innerHTML += xmlhttp.readyState;
+            messageLog.innerHTML += "status" + xmlhttp.status;
+            return xmlhttp.responseText
+        }
+
+        function show_button(element, state) {
+            // 0表示关， 1表示开， -1表示切换
+            var circle = element.children[0];
+            var text = element.children[1];
+            if (arguments.length == 1) state = -1;
+            if (state == -1) {
+                if (text.innerText == "开") {
+                    state = 0;
+                }
+            }
+
+            if (state == 0) {
+                element.style = "width: 60px;height: 25px;margin: 0 3px;border-radius: 25px;font-size: 14px;cursor: pointer;position: relative;border: 1px solid white;background-color: #ccc;"
+                circle.style = "position: absolute;width: 15px;height: 15px;top: 5px;left: 5px;border-radius: 50%;box-shadow: 0 0 10px white;transition: all .5s;left: 40px;background-color: #888;box-shadow: 0 0 10px #888;";
+                text.style = "position: absolute;right: 10px;line-height: 25px;transition: all .5s;right: 30px;color: #888;";
+                text.innerText = "关";
+            } else {
+                element.style = "width: 60px;height: 25px;margin: 0 3px;border-radius: 25px;font-size: 14px;cursor: pointer;position: relative;border: 1px solid white;background-color: #12B090;";
+                circle.style = "position: absolute;width: 15px;height: 15px;top: 5px;left: 5px;background-color: rgb(255, 255, 255);border-radius: 50%;box-shadow: 0 0 10px white;transition: all .5s;";
+                text.style = "position: absolute;right: 10px;line-height: 25px;color: white;transition: all .5s;";
+                text.innerText = "开";
+            }
+        }
+
+
+        function on_off1(e, gpio) {
+            var circle = e.children[0];
+            var text = e.children[1];
+
+
+            document.getElementById('messageLog').innerText += "<br> 参数gpio：" + gpio;
+
+            var response_text = get_post_info("POST", "/run", "gpio_number=" + gpio);
+            var response_json = window.JSON.parse(response_text);
+            var json_password = response_json.password;
+            messageLog.innerHTML += "<br> ---password：--" + json_password;
+            messageLog.innerHTML += "<br> ---转为字符串：--" + window.JSON.stringify(response_json);
+
+
+            if (text.innerText === "ON") {
+                e.style = "background-color: #ccc;"
+                circle.style = "left: 40px;background-color: #888;box-shadow: 0 0 10px #888;";
+                text.style = "right: 30px;color: #888;";
+                text.innerText = "OFF";
+            } else {
+                e.style = "";
+                circle.style = "";
+                text.style = "";
+                text.innerText = "ON";
+            }
+        }
+
+        function on_off(e) {
+            var circle = e.children[0];
+            var text = e.children[1];
+
+            if (text.innerText === "ON") {
+                e.style = "background-color: #ccc;"
+                circle.style = "left: 40px;background-color: #888;box-shadow: 0 0 10px #888;";
+                text.style = "right: 30px;color: #888;";
+                text.innerText = "OFF";
+            } else {
+                e.style = "";
+                circle.style = "";
+                text.style = "";
+                text.innerText = "ON";
+            }
+        }
+
+        function init_btn() {
+            document.getElementById('messageLog').innerText += "<br> init_btn开始加载。。。";
+            var btn_list = document.querySelectorAll(".btn-on");
+            document.getElementById('messageLog').innerText += "<br> length:" + btn_list.length;
+            show_button(btn_list[2], 1);
+            show_button(btn_list[3], 0);
+
+            var response_text = get_post_info("GET", "/gpio", "{}");
+            var response_json = window.JSON.parse(response_text);
+            for(var info in response_json){
+                if (btn_list[info]) {
+                    show_button(btn_list[info], response_json[info]);
+                }
+            }
+            //
+            //
+            // var json_password = response_json.items();
+            //
+            //
+            //
+            // var i;
+            // {
+            //     GPIO: {
+            //         0: 0;
+            //         1: 1;
+            //     }
+            // }
+            // for (i = 0; i < btn_list.length; i++) {
+                // btn_list[i].children[1].innerText = "OFF";
+
+
+                // on_off(btn_list[i]);
+            // }
+            document.getElementById('messageLog').innerText += "<br> init_btn完" + btn_list.length;
+        }
+
+
+
+
+        function body_load() {
+            document.getElementById('messageLog').innerText += '<br> boyd加载了！';
+            document.getElementById('messageLog').innerText += "<br> boyd加载完成";
+        }
+
+    </script>
+    <noscript>
+        当前浏览器不支持渲染脚本，请更换浏览器或平板后尝试！！
+    </noscript>
+</head>
+<body onload ="body_load()" style="align-items: center;justify-content: center;">
+    <table type="width:960px;">
+        <tr>
+            <input type="text" value="name"/>
+        </tr>
+        <tr>
+            <input type="text" value="password"/>
+        </tr>
+        <tr>
+            <button onclick="send_post();">send_msg</button>
+        </tr>
+        <tr>
+            <button onclick="disconnect();">dis_conect</button>
+        </tr>
+        <tr>
+            <p>
+                <span style="color:blue;" id="messageLog">log init</span>
+            </p>
+        </tr>
+    </table>
+
+    <form action="">
+        <table type="width:960px;">
+            <caption>交互GPIO界面</caption>
+            <thead>
+                <tr>
+                    <th>开关</th>
+                    <th>pin</th>
+                    <th>开关</th>
+                    <th>pin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="btn-on" onclick="on_off1(this, 1)">
+                            <label class="btn-on-circle"></label>
+                            <label class="btn-on-text">ON</label>
+                        </div>
+                    </td>
+                    <td>
+                        <span>GPIO 0</span>
+                    </td>
+                    <td>
+                        <div class="btn-on" onclick="on_off(this)">
+                            <label class="btn-on-circle"></label>
+                            <label class="btn-on-text">ON</label>
+                        </div>
+                    </td>
+                    <td>
+                        <span>GPIO 20</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="btn-on" onclick="on_off(this)">
+                            <label class="btn-on-circle"></label>
+                            <label class="btn-on-text">ON</label>
+                        </div>
+                    </td>
+                    <td>
+                        <span>GPIO 1</span>
+                    </td>
+                    <td>
+                        <div class="btn-on" onclick="on_off(this)">
+                            <label class="btn-on-circle"></label>
+                            <label class="btn-on-text">ON</label>
+                        </div>
+                    </td>
+                    <td>
+                        <span>GPIO 21</span>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4">表格结束</td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</body>
+</html>
